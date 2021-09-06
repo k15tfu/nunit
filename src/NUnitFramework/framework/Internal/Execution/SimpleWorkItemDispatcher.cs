@@ -62,7 +62,7 @@ namespace NUnit.Framework.Internal.Execution
             {
                 try
                 {
-                    _runnerThread.SetApartmentState(topLevelWorkItem.TargetApartment);
+                    _runnerThread.SetJetApartmentState(topLevelWorkItem.TargetApartment);
                 }
                 catch (PlatformNotSupportedException)
                 {

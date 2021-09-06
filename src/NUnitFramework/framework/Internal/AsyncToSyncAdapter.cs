@@ -63,7 +63,7 @@ namespace NUnit.Framework.Internal
 
         private static IDisposable InitializeExecutionEnvironment()
         {
-            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            if (Thread.CurrentThread.GetJetApartmentState() == ApartmentState.STA)
             {
                 var context = SynchronizationContext.Current;
                 if (context == null || context.GetType() == typeof(SynchronizationContext))

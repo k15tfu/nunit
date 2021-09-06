@@ -211,7 +211,7 @@ namespace NUnit.Framework.Internal.Execution
             // (--workers=0 option) it occurs routinely whenever a
             // different apartment is requested.
 
-            CurrentApartment = Thread.CurrentThread.GetApartmentState();
+            CurrentApartment = Thread.CurrentThread.GetJetApartmentState();
             var targetApartment = TargetApartment == ApartmentState.Unknown ? CurrentApartment : TargetApartment;
             var needsNewThreadToSetApartmentState = targetApartment != CurrentApartment;
 
@@ -462,7 +462,7 @@ namespace NUnit.Framework.Internal.Execution
 
             try
             {
-                thread.SetApartmentState(apartment);
+                thread.SetJetApartmentState(apartment);
             }
             catch (PlatformNotSupportedException)
             {
