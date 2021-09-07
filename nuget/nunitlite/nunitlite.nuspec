@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.12">
-    <id>NUnitLite</id>
+    <id>JetBrains.NUnitLite</id>
     <title>NUnitLite</title>
     <version>$version$</version>
     <authors>Charlie Poole, Rob Prouse</authors>
-    <owners>Charlie Poole, Rob Prouse</owners>
+    <owners>JetBrains</owners>
     <license type="file">LICENSE.txt</license>
     <projectUrl>https://nunit.org</projectUrl>
     <repository type="git" url="https://github.com/nunit/nunit"/>
