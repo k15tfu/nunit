@@ -144,7 +144,35 @@ namespace NUnit.Framework.Internal.Commands
 
         private Task<TestResult> RunTestOnSeparateThread(TestExecutionContext context)
         {
-            return Task.Run(() => innerCommand.Execute(context));
+            var targetApartment = Thread.CurrentThread.GetJetApartmentState();
+            var needsNewThreadToSetApartmentState = targetApartment != ApartmentState.Unknown;
+            if (!needsNewThreadToSetApartmentState)
+                return Task.Run(() => innerCommand.Execute(context));
+
+            var targetCulture = Thread.CurrentThread.CurrentCulture;
+            var targetUICulture = Thread.CurrentThread.CurrentUICulture;
+            TaskCompletionSource<TestResult> testResult = new TaskCompletionSource<TestResult>();
+            Thread thread = new Thread(() =>
+            {
+                Thread.CurrentThread.CurrentCulture = targetCulture;
+                Thread.CurrentThread.CurrentUICulture = targetUICulture;
+
+                try
+                {
+                    testResult.SetResult(innerCommand.Execute(context));
+                }
+                catch (Exception exception)
+                {
+                    testResult.SetException(exception);
+                }
+            });
+
+            thread.SetJetApartmentState(targetApartment);
+
+            thread.Start();
+            thread.Join();
+
+            return testResult.Task;
         }
 #endif
     }
