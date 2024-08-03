@@ -15,8 +15,10 @@ namespace NUnit.Framework.Internal
     internal static class JetThreadApartmentProxy
     {
         private static readonly Logger log = InternalTrace.GetLogger("JetThreadApartmentProxy");
-        private static readonly string JetThreadApartmentImpl = Environment.GetEnvironmentVariable("JetThreadApartmentImpl");
-        private static readonly Type JetThreadApartmentType = JetThreadApartmentImpl != null ? Assembly.LoadFrom(JetThreadApartmentImpl).GetType("JetBrains.Util.Concurrency.JetThreadApartment", true) : null;
+        // private static readonly string JetThreadApartmentImpl = Environment.GetEnvironmentVariable("JetThreadApartmentImpl");
+        // private static readonly string JetThreadApartmentImpl = "/home/user/p/dotnet-products/1/dotnet/Bin.RiderBackend/JetBrains.Platform.Core.dll";
+        // private static readonly Type JetThreadApartmentType = JetThreadApartmentImpl != null ? Assembly.LoadFrom(JetThreadApartmentImpl).GetType("JetBrains.Util.Concurrency.JetThreadApartment", true) : null;
+        private static readonly Type JetThreadApartmentType = Assembly.Load("JetBrains.Platform.Core").GetType("JetBrains.Util.Concurrency.JetThreadApartment", true);
         private static readonly MethodInfo JetThreadApartmentType_STAThread = JetThreadApartmentType?.GetMethod(nameof(STAThread), BindingFlags.Static | BindingFlags.Public);
         private static readonly MethodInfo JetThreadApartmentType_SetJetApartmentState = JetThreadApartmentType?.GetMethod(nameof(SetJetApartmentState), BindingFlags.Static | BindingFlags.Public);
         private static readonly MethodInfo JetThreadApartmentType_GetJetApartmentState = JetThreadApartmentType?.GetMethod(nameof(GetJetApartmentState), BindingFlags.Static | BindingFlags.Public);
@@ -38,7 +40,7 @@ namespace NUnit.Framework.Internal
         /// </summary>
         public static void SetJetApartmentState(this Thread thread, ApartmentState state)
         {
-            log.Warning($"JetThreadApartmentImpl = {JetThreadApartmentImpl}");
+            // log.Warning($"JetThreadApartmentImpl = {JetThreadApartmentImpl}");
             log.Warning($"JetThreadApartmentType = {JetThreadApartmentType}");
             log.Warning($"JetThreadApartmentType_SetJetApartmentState = {JetThreadApartmentType_SetJetApartmentState}");
             if (JetThreadApartmentType_SetJetApartmentState != null)
