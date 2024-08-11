@@ -24,6 +24,7 @@
 using System;
 using System.Threading;
 #if !THREAD_ABORT
+using System.Diagnostics;
 using System.Threading.Tasks;
 #endif
 using NUnit.Framework.Interfaces;
@@ -120,8 +121,8 @@ namespace NUnit.Framework.Internal.Commands
         {
             try
             {
-                var testExecution = RunTestOnSeparateThread(context);
-                if (Task.WaitAny(new Task[] { testExecution }, _timeout) != -1
+                var testExecution = RunTestOnCurrentThread(context, out var elapsedMilliseconds);
+                if (elapsedMilliseconds <= _timeout
                     || _debugger.IsAttached)
                 {
                     context.CurrentResult = testExecution.GetAwaiter().GetResult();
@@ -142,37 +143,13 @@ namespace NUnit.Framework.Internal.Commands
             return context.CurrentResult;
         }
 
-        private Task<TestResult> RunTestOnSeparateThread(TestExecutionContext context)
+        private Task<TestResult> RunTestOnCurrentThread(TestExecutionContext context, out long elapsedMilliseconds)
         {
-            var targetApartment = Thread.CurrentThread.GetJetApartmentState();
-            var needsNewThreadToSetApartmentState = targetApartment != ApartmentState.Unknown;
-            if (!needsNewThreadToSetApartmentState)
-                return Task.Run(() => innerCommand.Execute(context));
-
-            var targetCulture = Thread.CurrentThread.CurrentCulture;
-            var targetUICulture = Thread.CurrentThread.CurrentUICulture;
-            TaskCompletionSource<TestResult> testResult = new TaskCompletionSource<TestResult>();
-            Thread thread = new Thread(() =>
-            {
-                Thread.CurrentThread.CurrentCulture = targetCulture;
-                Thread.CurrentThread.CurrentUICulture = targetUICulture;
-
-                try
-                {
-                    testResult.SetResult(innerCommand.Execute(context));
-                }
-                catch (Exception exception)
-                {
-                    testResult.SetException(exception);
-                }
-            });
-
-            thread.SetJetApartmentState(targetApartment);
-
-            thread.Start();
-            thread.Join();
-
-            return testResult.Task;
+            var stopwatch = Stopwatch.StartNew();
+            var testResult = innerCommand.Execute(context);
+            stopwatch.Stop();
+            elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+            return Task.FromResult(testResult);
         }
 #endif
     }
